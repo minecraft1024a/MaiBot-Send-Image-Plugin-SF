@@ -37,7 +37,7 @@
 - **配置文件错误**: 确保配置文件格式正确。
 
 ## 贡献
-欢迎贡献代码和报告问题。请访问[GitHub仓库](https://github.com/your-repo)获取更多信息。
+欢迎贡献代码和报告问题。请访问[GitHub仓库](https://github.com/minecraft1024a/send_image_plugin_sf)获取更多信息。
 ## 鸣谢
 MaiM-with-u开发组为我们开发如此优质的[麦麦机器人](https://github.com/MaiM-with-u/MaiBot)
 Copilot老师帮我改好这座石山
