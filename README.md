@@ -39,8 +39,8 @@
 ## 贡献
 欢迎贡献代码和报告问题。请访问[GitHub仓库](https://github.com/minecraft1024a/send_image_plugin_sf)获取更多信息。
 ## 鸣谢
-MaiM-with-u开发组为我们开发如此优质的[麦麦机器人](https://github.com/MaiM-with-u/MaiBot)
-Copilot老师帮我改好这座石山
-麦麦答疑群(梁山伯)的所有成员
+- MaiM-with-u开发组为我们开发如此优质的[麦麦机器人](https://github.com/MaiM-with-u/MaiBot)
+- Copilot老师帮我改好这座石山
+- 麦麦答疑群(梁山伯)的所有成员
 ## 许可证
 本项目采用MIT许可证。有关详细信息，请参阅[LICENSE](LICENSE)文件。
