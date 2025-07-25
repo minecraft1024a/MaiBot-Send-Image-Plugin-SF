@@ -1,11 +1,11 @@
 {
         "manifest_version": 1,
         "name": "硅基流动生图插件",
-        "version": "0.4",
+        "version": "0.5",
         "description": "发送图片的插件动作，支持通过硅基流动生成图片并发送，兼容base64图片返回方式。",
         "author": {"name": "yishang/一闪", "url": "https://github.com/minecraft1024a"},
         "license": "MIT",
-        "host_application": {"min_version": "0.8.0", "max_version": "0.8.0"},
+        "host_application": {"min_version": "0.9.0", "max_version": "0.9.0"},
         "homepage_url": "https://github.com/minecraft1024a/send_image_plugin_sf",
         "repository_url": "https://github.com/minecraft1024a/send_image_plugin_sf",
         "keywords": ["生成图片", "画图", "create image", "draw"],

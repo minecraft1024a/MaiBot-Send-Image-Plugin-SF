@@ -7,16 +7,15 @@ from src.plugin_system import (
     BasePlugin,
     register_plugin,
     BaseAction,
-    BaseCommand,
     ComponentInfo,
     ChatMode,
     ActionActivationType,
-    ConfigField,
 )
+from src.plugin_system.base.config_types import ConfigField
 from src.common.logger import get_logger
 import aiohttp
 
-logger = get_logger("send_image_action")
+logger = get_logger("send_image_plugin_sf")
 class SendImageAction(BaseAction):
     """智能图片生成Action - 基于LLM生成图片"""
 
@@ -126,26 +125,14 @@ class SendImageAction(BaseAction):
                             async with session.get(img_url) as img_resp:
                                 if img_resp.status == 200:
                                     img_bytes = await img_resp.read()
-                                    # 先保存为png文件
-                                    log_dir = os.path.join(os.path.dirname(__file__), 'log')
-                                    os.makedirs(log_dir, exist_ok=True)
-                                    png_path = os.path.join(log_dir, 'downloaded_image.png')
-                                    with open(png_path, 'wb') as f:
-                                        f.write(img_bytes)
-                                    # 再读取文件转base64
-                                    with open(png_path, "rb") as image_file:
-                                        base64_image_string = base64.b64encode(image_file.read()).decode("utf-8")
-                                    # 保存base64到log文件夹
-                                    log_path = os.path.join(log_dir, 'image_base64.txt')
-                                    with open(log_path, 'w', encoding='utf-8') as f:
-                                        f.write(f"长度: {len(base64_image_string)}\n")
-                                        f.write(base64_image_string)
+                                    base64_image_string = base64.b64encode(img_bytes).decode("utf-8")
                                     await self.send_image(base64_image_string)
-                                    logger.info(f"长度: {len(base64_image_string)}\nBase64内容已写入: {log_path}")
-                                    return True, f"已生成并发送图片（url转png base64），prompt: {prompt}, 分辨率: 768x768"
+                                    logger.info(f"图片已通过URL下载并转换为Base64发送")
+                                    return True, f"已生成并发送图片（URL转Base64），prompt: {prompt}"
                         except Exception as e:
-                            logger.error(f"图片下载或png base64转换失败: {e}")
-                            return True, f"已生成并发送图片（url直链），prompt: {prompt}, 分辨率: 768x768"
+                            logger.error(f"图片下载或Base64转换失败: {e}")
+                            await self.send_text("图片下载或处理失败")
+                            return False, f"图片下载或Base64转换失败: {e}"
                     logger.error(f"SiliconFlow生成结果异常: {result}")
                     await self.send_text(f"图片生成失败（SiliconFlow生成结果异常）")
                     return False, "图片生成失败（SiliconFlow生成结果异常）"
@@ -153,26 +140,12 @@ class SendImageAction(BaseAction):
             logger.error(f"生成并发送图片失败: {e}")
             return False, "图片生成或发送失败"
 
-    def _get_template_message(self, description: str) -> str:
-        """获取模板化的生成结果消息"""
-        templates = self.api.get_config(
-            "send_image.templates",
-            [
-                "好的，已生成图片：{description}",
-                "收到，图片生成完成：{description}",
-                "明白了，已完成图片生成：{description}",
-            ],
-        )
-
-        template = random.choice(templates)
-        return template.format(description=description)
-
 @register_plugin
 class SendImagePlugin(BasePlugin):
     # 插件基本信息
     plugin_name = "Send_Image_plugin_sf"
     plugin_description = "发送图片的插件动作，支持通过LLM生成图片并发送，兼容base64和url两种图片返回方式。"
-    plugin_version = "0.4.0"
+    plugin_version = "0.5.0"
     plugin_author = "yishang"
     enable_plugin = True
     config_file_name = "config.toml"
@@ -182,14 +155,13 @@ class SendImagePlugin(BasePlugin):
         "plugin": "插件启用与版本配置",
         "components": "组件启用控制",
         "api": "图片生成API相关配置",
-        "logging": "日志记录相关配置"
     }
 
     # 配置Schema定义（自动生成config.toml）
     config_schema = {
         "plugin": {
             "enabled": ConfigField(type=bool, default=True, description="是否启用插件"),
-            "config_version": ConfigField(type=str, default="1.2.0", description="配置文件版本"),
+            "config_version": ConfigField(type=str, default="1.2.1", description="配置文件版本"),
         },
         "components": {
             "enable_send_image_action": ConfigField(type=bool, default=True, description="是否启用图片生成Action"),
@@ -198,10 +170,6 @@ class SendImagePlugin(BasePlugin):
             "sf_api_key": ConfigField(type=str, default="your_api_key", description="SiliconFlow API密钥（必填）", example="sk-xxxx"),
             "image_size": ConfigField(type=str, default="768x1024", description="图片分辨率，格式如768x1024"),
         },
-        "logging": {
-            "level": ConfigField(type=str, default="INFO", description="日志记录级别", choices=["DEBUG", "INFO", "WARNING", "ERROR"]),
-            "prefix": ConfigField(type=str, default="[SendImageAction]", description="日志前缀", example="[SendImageAction]"),
-        }
     }
 
     def __init__(self, plugin_dir=None, *args, **kwargs):
