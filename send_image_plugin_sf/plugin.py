@@ -149,6 +149,8 @@ class SendImagePlugin(BasePlugin):
     plugin_author = "yishang"
     enable_plugin = True
     config_file_name = "config.toml"
+    dependencies: list[str] = []  # 插件依赖列表
+    python_dependencies: list[str] = []  # Python包依赖列表
 
     # 配置节描述（自动生成注释）
     config_section_descriptions = {
