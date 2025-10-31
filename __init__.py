@@ -7,5 +7,4 @@ __plugin_meta__ = PluginMetadata(
     version="0.5",
     author="yishang/一闪",
     license="MIT",
-    repository_url="https://github.com/minecraft1024a/MaiBot-Send-Image-Plugin-SF"
 )
