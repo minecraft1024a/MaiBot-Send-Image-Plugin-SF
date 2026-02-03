@@ -68,7 +68,7 @@ class SendImageAction(BaseAction):
         """使用配置的LLM模型优化提示词（专注于二次元风格）"""
         try:
             # 1. 从配置获取默认模型名称
-            default_model_name = self.get_config("llm.default_model", "replyer_1")
+            default_model_name = str(self.get_config("llm.default_model", "replyer_1"))
             logger.info(f"{self.log_prefix} 配置的默认模型: {default_model_name}")
             
             # 2. 获取可用模型列表
@@ -199,9 +199,9 @@ soft shading, clean outlines, official art style"
             return f"anime style, {original_prompt}"
 
     async def execute(self) -> Tuple[bool, str]:
+        """执行智能图片生成"""
         api_key = self.get_config("api.sf_api_key", "default_key")
         image_size = self.get_config("api.sf_image_size", "768x1024")
-        """执行智能图片生成"""
         logger.info(f"{self.log_prefix} 执行智能图片生成动作")
 
         # 获取参数
