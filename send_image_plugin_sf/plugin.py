@@ -1,8 +1,7 @@
 import os
 import random
 import base64
-import io
-from typing import Tuple, Dict, Optional, List, Type
+from typing import Tuple, List, Type
 from src.plugin_system import (
     BasePlugin,
     register_plugin,
@@ -132,7 +131,7 @@ soft shading, clean outlines, official art style"
 ### 优化结果（只输出优化后的提示词，不要包含任何其他文字）：
 """
             # 6. 调用LLM API并处理可能的多种返回值格式
-            logger.info(f"{self.log_prefix} 调用LLM优化提示词，模型: {model_config.get('name', default_model_name)}")
+            logger.info(f"{self.log_prefix} 调用LLM优化提示词")
             
             # 调用API并处理返回值
             api_result = await llm_api.generate_with_model(
@@ -140,7 +139,6 @@ soft shading, clean outlines, official art style"
                 model_config=model_config,
                 temperature=0.7,
                 max_tokens=500,
-                top_p=0.9
             )
             
             # 处理不同格式的返回值
@@ -251,14 +249,13 @@ soft shading, clean outlines, official art style"
                     img_url = None
                     images = result.get("data", [])
                     
-                    if images and isinstance(images, list) and len(images) > 0:
-                        if "image" in images[0]:
-                            img_b64 = images[0]["image"]
-                            await self.send_type(type="image", data=img_b64)
-                            return True, f"已生成并发送图片，prompt: {prompt}"
+                    if images and isinstance(images, list) and len(images) > 0 and isinstance(images[0], dict):
                         if "url" in images[0]:
                             img_url = images[0]["url"]
-                    elif "url" in result:
+                        else:
+                            logger.warning(f"SiliconFlow响应中data[0]缺少'url'字段: {result}")
+                    else:
+                        logger.warning(f"SiliconFlow响应中缺少预期的'data[0].url'结构: {result}")
                         img_url = result["url"]
                     
                     if img_url:
@@ -268,7 +265,7 @@ soft shading, clean outlines, official art style"
                                     img_bytes = await img_resp.read()
                                     base64_image_string = base64.b64encode(img_bytes).decode("utf-8")
                                     await self.send_image(base64_image_string)
-                                    logger.info(f"图片已通过URL下载并转换为Base64发送")
+                                    logger.info("图片已通过URL下载并转换为Base64发送")
                                     return True, f"已生成并发送图片（URL转Base64），prompt: {prompt}"
                         except Exception as e:
                             logger.error(f"图片下载或Base64转换失败: {e}")
@@ -276,7 +273,7 @@ soft shading, clean outlines, official art style"
                             return False, f"图片下载或Base64转换失败: {e}"
                     
                     logger.error(f"SiliconFlow生成结果异常: {result}")
-                    await self.send_text(f"图片生成失败（SiliconFlow生成结果异常）")
+                    await self.send_text("图片生成失败（SiliconFlow生成结果异常）")
                     return False, "图片生成失败（SiliconFlow生成结果异常）"
         except Exception as e:
             logger.error(f"生成并发送图片失败: {e}")
